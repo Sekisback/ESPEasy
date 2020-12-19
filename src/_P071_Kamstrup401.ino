@@ -1,3 +1,4 @@
+#include "_Plugin_Helper.h"
 #ifdef USES_P071
 //#######################################################################################################
 //############################# Plugin 071: Kamstrup Multical 401 #######################################
@@ -12,6 +13,8 @@
 
 
 #include <ESPeasySerial.h>
+
+
 #define PLUGIN_071
 #define PLUGIN_ID_071 71
 #define PLUGIN_NAME_071 "Communication - Kamstrup Multical 401 [TESTING]"
@@ -31,8 +34,8 @@ boolean Plugin_071(byte function, struct EventStruct *event, String& string)
     case PLUGIN_DEVICE_ADD:
       {
         Device[++deviceCount].Number = PLUGIN_ID_071;
-        Device[deviceCount].Type = DEVICE_TYPE_DUAL;
-        Device[deviceCount].VType = SENSOR_TYPE_DUAL;
+        Device[deviceCount].Type = DEVICE_TYPE_SERIAL;
+        Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_DUAL;
         Device[deviceCount].Ports = 0;
         Device[deviceCount].PullUpOption = false;
         Device[deviceCount].InverseLogicOption = false;
@@ -63,6 +66,13 @@ boolean Plugin_071(byte function, struct EventStruct *event, String& string)
         break;
       }
 
+    case PLUGIN_WEBFORM_SHOW_CONFIG:
+      {
+        string += serialHelper_getSerialTypeLabel(event);
+        success = true;
+        break;
+      }
+
     case PLUGIN_INIT:
       {
         Plugin_071_init = true;
@@ -73,14 +83,11 @@ boolean Plugin_071(byte function, struct EventStruct *event, String& string)
 
     case PLUGIN_WEBFORM_LOAD:
       {
-        serialHelper_webformLoad(event);
         success = true;
         break;
       }
 
     case PLUGIN_WEBFORM_SAVE: {
-      serialHelper_webformSave(event);
-
       success = true;
       break;
     }
@@ -89,8 +96,9 @@ boolean Plugin_071(byte function, struct EventStruct *event, String& string)
       {
         PIN_KAMSER_RX = CONFIG_PIN1;
         PIN_KAMSER_TX = CONFIG_PIN2;
+        const ESPEasySerialPort port = static_cast<ESPEasySerialPort>(CONFIG_PORT);
 
-        ESPeasySerial kamSer(PIN_KAMSER_RX, PIN_KAMSER_TX, false);  // Initialize serial
+        ESPeasySerial kamSer(port, PIN_KAMSER_RX, PIN_KAMSER_TX, false);  // Initialize serial
 
         pinMode(PIN_KAMSER_RX,INPUT);
         pinMode(PIN_KAMSER_TX,OUTPUT);
@@ -173,25 +181,25 @@ boolean Plugin_071(byte function, struct EventStruct *event, String& string)
 
               tmpstr = strtok(NULL, " ");
               if (tmpstr)
-               m_tempin = atol(tmpstr)/100.0;
+               m_tempin = atol(tmpstr)/100.0f;
               else
                m_tempin = 0;
 
               tmpstr = strtok(NULL, " ");
               if (tmpstr)
-               m_tempout = atol(tmpstr)/100.0;
+               m_tempout = atol(tmpstr)/100.0f;
               else
                m_tempout = 0;
 
               tmpstr = strtok(NULL, " ");
               if (tmpstr)
-               m_tempdiff = atol(tmpstr)/100.0;
+               m_tempdiff = atol(tmpstr)/100.0f;
               else
                m_tempdiff = 0;
 
               tmpstr = strtok(NULL, " ");
               if (tmpstr)
-               m_power = atol(tmpstr)/10.0;
+               m_power = atol(tmpstr)/10.0f;
               else
                m_power = 0;
 

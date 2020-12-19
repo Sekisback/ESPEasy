@@ -89,10 +89,10 @@ Besides the internal commands there's also plugin specific commands. These are l
 .. .. include:: ../Plugin/P002_commands.repl
 
 
-.. P003 :ref:`P003_page`
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+P003 :ref:`P003_page`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. .. include:: ../Plugin/P003_commands.repl
+.. include:: ../Plugin/P003_commands.repl
 
 
 .. P004 :ref:`P004_page`
@@ -287,10 +287,10 @@ Besides the internal commands there's also plugin specific commands. These are l
 .. .. include:: ../Plugin/P035_commands.repl
 
 
-.. P036 :ref:`P036_page`
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+P036 :ref:`P036_page`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. .. include:: ../Plugin/P036_commands.repl
+.. include:: ../Plugin/P036_commands.repl
 
 
 .. P037 :ref:`P037_page`
@@ -521,10 +521,10 @@ P052 :ref:`P052_page`
 .. .. include:: ../Plugin/P074_commands.repl
 
 
-.. P075 :ref:`P075_page`
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+P075 :ref:`P075_page`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. .. include:: ../Plugin/P075_commands.repl
+.. include:: ../Plugin/P075_commands.repl
 
 
 .. P076 :ref:`P076_page`
@@ -545,10 +545,10 @@ P052 :ref:`P052_page`
 .. .. include:: ../Plugin/P078_commands.repl
 
 
-.. P079 :ref:`P079_page`
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+P079 :ref:`P079_page`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. .. include:: ../Plugin/P079_commands.repl
+.. include:: ../Plugin/P079_commands.repl
 
 
 .. P080 :ref:`P080_page`
@@ -567,3 +567,8 @@ P052 :ref:`P052_page`
 .. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. .. include:: ../Plugin/P082_commands.repl
+
+P101 :ref:`P101_page`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. include:: ../Plugin/P101_commands.repl

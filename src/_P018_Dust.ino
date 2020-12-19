@@ -1,3 +1,4 @@
+#include "_Plugin_Helper.h"
 #ifdef USES_P018
 //#######################################################################################################
 //#################################### Plugin 018: GP2Y10 ###############################################
@@ -21,7 +22,7 @@ boolean Plugin_018(byte function, struct EventStruct *event, String& string)
       {
         Device[++deviceCount].Number = PLUGIN_ID_018;
         Device[deviceCount].Type = DEVICE_TYPE_SINGLE;
-        Device[deviceCount].VType = SENSOR_TYPE_SINGLE;
+        Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_SINGLE;
         Device[deviceCount].Ports = 0;
         Device[deviceCount].PullUpOption = false;
         Device[deviceCount].InverseLogicOption = false;
@@ -73,7 +74,7 @@ boolean Plugin_018(byte function, struct EventStruct *event, String& string)
         {
           digitalWrite(Plugin_GP2Y10_LED_Pin, LOW);
           delayMicroseconds(280);
-          value = value + analogRead(A0);
+          value = value + espeasy_analogRead(A0);
           delayMicroseconds(40);
           digitalWrite(Plugin_GP2Y10_LED_Pin, HIGH);
           delayMicroseconds(9680);

@@ -1,3 +1,4 @@
+#include "_Plugin_Helper.h"
 #ifdef USES_P039
 //#######################################################################################################
 //######################## Plugin 039: Thermocouple (MAX6675 / MAX31855) ################################
@@ -36,6 +37,7 @@
 
 #include <SPI.h>
 
+
 #define PLUGIN_039
 #define PLUGIN_ID_039         39
 #define PLUGIN_NAME_039       "Environment - Thermocouple"
@@ -44,7 +46,7 @@
 uint8_t Plugin_039_SPI_CS_Pin = 15;  // D8
 bool Plugin_039_SensorAttached = true;
 uint32_t Plugin_039_Sensor_fault = 0;
-double Plugin_039_Celsius = 0.0;
+float Plugin_039_Celsius = 0.0f;
 
 boolean Plugin_039(byte function, struct EventStruct *event, String& string)
 {
@@ -55,8 +57,8 @@ boolean Plugin_039(byte function, struct EventStruct *event, String& string)
     case PLUGIN_DEVICE_ADD:
       {
         Device[++deviceCount].Number = PLUGIN_ID_039;
-        Device[deviceCount].Type = DEVICE_TYPE_SINGLE;
-        Device[deviceCount].VType = SENSOR_TYPE_SINGLE;
+        Device[deviceCount].Type = DEVICE_TYPE_SPI;
+        Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_SINGLE;
         Device[deviceCount].Ports = 0;
         Device[deviceCount].PullUpOption = false;
         Device[deviceCount].InverseLogicOption = false;
@@ -110,7 +112,13 @@ boolean Plugin_039(byte function, struct EventStruct *event, String& string)
 
     case PLUGIN_WEBFORM_LOAD:
       {
+        // FIXME TD-er: Why is this list needed? GPIO selector should provide this info.
+        #ifdef ESP8266
         addFormNote(F("<b>1st GPIO</b> = CS (Usable GPIOs : 0, 2, 4, 5, 15)"));
+        #endif
+        #ifdef ESP32
+        addFormNote(F("<b>1st GPIO</b> = CS (Usable GPIOs : 0, 2, 4, 5, 15..19, 21..23, 25..27, 32, 33)"));
+        #endif
         //addHtml(F("<TR><TD>Info GPIO:<TD><b>1st GPIO</b> = CS (Usable GPIOs : 0, 2, 4, 5, 15)"));
 
         byte choice = PCONFIG(0);
@@ -176,7 +184,7 @@ boolean Plugin_039(byte function, struct EventStruct *event, String& string)
   return success;
 }
 
-double readMax6675()
+float readMax6675()
 {
   uint16_t rawvalue = 0;
   // take the SS pin low to select the chip:
@@ -209,7 +217,7 @@ double readMax6675()
     rawvalue >>= 3;
 
     // Calculate Celsius
-    return rawvalue * 0.25;
+    return rawvalue * 0.25f;
   }
   else
   {
@@ -217,7 +225,7 @@ double readMax6675()
   }
 }
 
-double readMax31855()
+float readMax31855()
 {
   uint32_t rawvalue = 0;
   // take the SS pin low to select the chip:
@@ -276,7 +284,7 @@ double readMax31855()
     // We're left with (32 - 18 =) 14 bits
     int temperature = Plugin_039_convert_two_complement(rawvalue, 14);
     // Calculate Celsius
-    return temperature * 0.25;
+    return temperature * 0.25f;
   }
   else
   {

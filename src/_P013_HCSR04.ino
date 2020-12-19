@@ -1,7 +1,10 @@
+#include "_Plugin_Helper.h"
+
 #ifdef USES_P013
 //#######################################################################################################
 //############################### Plugin 013: HC-SR04, RCW-0001, etc. ###################################
 //#######################################################################################################
+
 
 #define PLUGIN_013
 #define PLUGIN_ID_013        13
@@ -39,7 +42,7 @@ boolean Plugin_013(byte function, struct EventStruct *event, String& string)
       {
         Device[++deviceCount].Number = PLUGIN_ID_013;
         Device[deviceCount].Type = DEVICE_TYPE_DUAL;
-        Device[deviceCount].VType = SENSOR_TYPE_SINGLE;
+        Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_SINGLE;
         Device[deviceCount].Ports = 0;
         Device[deviceCount].PullUpOption = false;
         Device[deviceCount].InverseLogicOption = false;
@@ -117,7 +120,7 @@ boolean Plugin_013(byte function, struct EventStruct *event, String& string)
 
         // enable filtersize option if filter is used,
         if (filterType != FILTER_NONE)
-        	addFormNumericBox(F("Filter size"), F("p013_FilterSize"), filterSize, 2, 20);
+        	addFormNumericBox(F("Number of Pings"), F("p013_FilterSize"), filterSize, 2, 20);
 
         success = true;
         break;
@@ -254,7 +257,7 @@ boolean Plugin_013(byte function, struct EventStruct *event, String& string)
               addLog(LOG_LEVEL_INFO,log);
               switchstate[event->TaskIndex] = state;
               UserVar[event->BaseVarIndex] = state;
-              event->sensorType = SENSOR_TYPE_SWITCH;
+              event->sensorType = Sensor_VType::SENSOR_TYPE_SWITCH;
               sendData(event);
             }
           }
@@ -275,7 +278,7 @@ boolean Plugin_013(byte function, struct EventStruct *event, String& string)
 }
 
 /*********************************************************************/
-float Plugin_013_read(unsigned int taskIndex)
+float Plugin_013_read(taskIndex_t taskIndex)
 /*********************************************************************/
 {
   if (P_013_sensordefs.count(taskIndex) == 0)
@@ -307,7 +310,7 @@ float Plugin_013_read(unsigned int taskIndex)
 }
 
 /*********************************************************************/
-String Plugin_013_getErrorStatusString(unsigned int taskIndex)
+String Plugin_013_getErrorStatusString(taskIndex_t taskIndex)
 /*********************************************************************/
 {
   if (P_013_sensordefs.count(taskIndex) == 0)
@@ -316,42 +319,34 @@ String Plugin_013_getErrorStatusString(unsigned int taskIndex)
   switch ((P_013_sensordefs[taskIndex])->getErrorState()) {
     case NewPingESP8266::STATUS_SENSOR_READY: {
       return String(F("Sensor ready"));
-      break;
     }
 
     case NewPingESP8266::STATUS_MEASUREMENT_VALID: {
       return String(F("no error, measurement valid"));
-      break;
     }
 
     case NewPingESP8266::STATUS_ECHO_TRIGGERED: {
       return String(F("Echo triggered, waiting for Echo end"));
-      break;
     }
 
     case NewPingESP8266::STATUS_ECHO_STATE_ERROR: {
       return String(F("Echo pulse error, Echopin not low on trigger"));
-      break;
     }
 
     case NewPingESP8266::STATUS_ECHO_START_TIMEOUT_50ms: {
       return String(F("Echo timeout error, no echo start whithin 50 ms"));
-      break;
     }
 
     case NewPingESP8266::STATUS_ECHO_START_TIMEOUT_DISTANCE: {
       return String(F("Echo timeout error, no echo start whithin time for max. distance"));
-      break;
     }
 
     case NewPingESP8266::STATUS_MAX_DISTANCE_EXCEEDED: {
       return String(F("Echo too late, maximum distance exceeded"));
-      break;
     }
 
     default: {
       return String(F("unknown error"));
-      break;
     }
 
   }

@@ -1,6 +1,7 @@
 // Copyright 2017 David Conran
 
 #include "ir_Midea.h"
+#include "IRac.h"
 #include "IRsend.h"
 #include "IRsend_test.h"
 #include "gtest/gtest.h"
@@ -15,6 +16,7 @@ TEST(TestSendMidea, SendDataOnly) {
   irsend.reset();
   irsend.sendMidea(0x0);
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s560m560s560m560s560m560s560m560s560m560s560m560s560m560s560"
       "m560s560m560s560m560s560m560s560m560s560m560s560m560s560m560s560"
@@ -36,6 +38,7 @@ TEST(TestSendMidea, SendDataOnly) {
   irsend.reset();
   irsend.sendMidea(0x55AA55AA55AA);
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s560m560s1680m560s560m560s1680m560s560m560s1680m560s560m560s1680"
       "m560s1680m560s560m560s1680m560s560m560s1680m560s560m560s1680m560s560"
@@ -57,6 +60,7 @@ TEST(TestSendMidea, SendDataOnly) {
   irsend.reset();
   irsend.sendMidea(0xFFFFFFFFFFFF);
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680"
       "m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680"
@@ -84,6 +88,7 @@ TEST(TestSendMidea, SendWithRepeats) {
   irsend.reset();
   irsend.sendMidea(0x55AA55AA55AA, kMideaBits, 1);  // 1 repeat.
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s560m560s1680m560s560m560s1680m560s560m560s1680m560s560m560s1680"
       "m560s1680m560s560m560s1680m560s560m560s1680m560s560m560s1680m560s560"
@@ -119,6 +124,7 @@ TEST(TestSendMidea, SendWithRepeats) {
       irsend.outputStr());
   irsend.sendMidea(0x55AA55AA55AA, kMideaBits, 2);  // 2 repeats.
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s560m560s1680m560s560m560s1680m560s560m560s1680m560s560m560s1680"
       "m560s1680m560s560m560s1680m560s560m560s1680m560s560m560s1680m560s560"
@@ -178,6 +184,7 @@ TEST(TestSendMidea, SendUnusualSize) {
   irsend.reset();
   irsend.sendMidea(0x0, 8);
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s560m560s560m560s560m560s560m560s560m560s560m560s560m560s560"
       "m560s5600"
@@ -189,6 +196,7 @@ TEST(TestSendMidea, SendUnusualSize) {
   irsend.reset();
   irsend.sendMidea(0x1234567890ABCDEF, 64);
   EXPECT_EQ(
+      "f38000d50"
       "m4480s4480"
       "m560s560m560s560m560s560m560s1680m560s560m560s560m560s1680m560s560"
       "m560s560m560s560m560s1680m560s1680m560s560m560s1680m560s560m560s560"
@@ -390,13 +398,13 @@ TEST(TestMideaACClass, Temperature) {
   EXPECT_EQ(kMideaACMaxTempF, midea.getTemp(false));
 
   // General changes.
-  midea.setTemp(17, true);              // C
-  EXPECT_EQ(17, midea.getTemp(true));   // C
-  EXPECT_EQ(63, midea.getTemp(false));  // F
+  midea.setTemp(18, true);              // C
+  EXPECT_EQ(18, midea.getTemp(true));   // C
+  EXPECT_EQ(64, midea.getTemp(false));  // F
 
   midea.setTemp(21, true);              // C
   EXPECT_EQ(21, midea.getTemp(true));   // C
-  EXPECT_EQ(70, midea.getTemp(false));  // F
+  EXPECT_EQ(69, midea.getTemp(false));  // F
 
   midea.setTemp(25, true);              // C
   EXPECT_EQ(25, midea.getTemp(true));   // C
@@ -407,7 +415,7 @@ TEST(TestMideaACClass, Temperature) {
   EXPECT_EQ(86, midea.getTemp(false));  // F
 
   midea.setTemp(80, false);             // F
-  EXPECT_EQ(26, midea.getTemp(true));   // C
+  EXPECT_EQ(27, midea.getTemp(true));   // C
   EXPECT_EQ(80, midea.getTemp(false));  // F
 
   midea.setTemp(70);                    // F
@@ -433,25 +441,30 @@ TEST(TestMideaACClass, Sleep) {
 }
 
 TEST(TestMideaACClass, HumanReadableOutput) {
-  IRMideaAC midea(0);
-  midea.begin();
+  IRMideaAC ac(kGpioUnused);
+  ac.begin();
 
-  midea.setRaw(0xA1826FFFFF62);
+  ac.setRaw(0xA1826FFFFF62);
   EXPECT_EQ(
-      "Power: On, Mode: 2 (AUTO), Temp: 25C/77F, Fan: 0 (AUTO), "
-      "Sleep: Off",
-      midea.toString());
-  midea.off();
-  midea.setTemp(25);
-  midea.setFan(kMideaACFanHigh);
-  midea.setMode(kMideaACDry);
-  midea.setSleep(true);
-  EXPECT_EQ("Power: Off, Mode: 1 (DRY), Temp: 16C/62F, Fan: 3 (HI), Sleep: On",
-            midea.toString());
+      "Power: On, Mode: 2 (Auto), Celsius: Off, Temp: 25C/77F, Fan: 0 (Auto), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+  ac.off();
+  ac.setTemp(25, true);
+  ac.setFan(kMideaACFanHigh);
+  ac.setMode(kMideaACDry);
+  ac.setSleep(true);
+  EXPECT_EQ(
+      "Power: Off, Mode: 1 (Dry), Celsius: Off, Temp: 25C/77F, Fan: 3 (High), "
+      "Sleep: On, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+  ac.setUseCelsius(true);
+  EXPECT_EQ(
+      "Power: Off, Mode: 1 (Dry), Celsius: On, Temp: 25C/77F, Fan: 3 (High), "
+      "Sleep: On, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
 
-  midea.setRaw(0xA19867FFFF7E);
-  EXPECT_EQ("Power: On, Mode: 0 (COOL), Temp: 20C/69F, Fan: 3 (HI), Sleep: Off",
-            midea.toString());
+  ac.setRaw(0xA19867FFFF7E);
+  EXPECT_EQ(
+      "Power: On, Mode: 0 (Cool), Celsius: Off, Temp: 21C/69F, Fan: 3 (High), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
 }
 
 // Tests for decodeMidea().
@@ -466,7 +479,8 @@ TEST(TestDecodeMidea, NormalDecodeWithStrict) {
   irsend.reset();
   irsend.sendMidea(0x1234567890DF);
   irsend.makeDecodeResult();
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 true));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0x1234567890DF, irsend.capture.value);
@@ -478,7 +492,8 @@ TEST(TestDecodeMidea, NormalDecodeWithStrict) {
   irsend.reset();
   irsend.sendMidea(0x0);
   irsend.makeDecodeResult();
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 true));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0x0, irsend.capture.value);
@@ -490,7 +505,8 @@ TEST(TestDecodeMidea, NormalDecodeWithStrict) {
   irsend.reset();
   irsend.sendMidea(0xFFFFFFFFFFA0);
   irsend.makeDecodeResult();
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 true));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0xFFFFFFFFFFA0, irsend.capture.value);
@@ -522,20 +538,23 @@ TEST(TestDecodeMidea, NormalDecodeWithRepeatAndStrict) {
   irsend.reset();
   irsend.sendMidea(0xA18263FFFF6E, kMideaBits, 2);
   irsend.makeDecodeResult();
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 true));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0xA18263FFFF6E, irsend.capture.value);
   EXPECT_FALSE(irsend.capture.repeat);
 
   irsend.makeDecodeResult(2 * (2 * kMideaBits + 4));
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 true));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0xA18263FFFF6E, irsend.capture.value);
 
   irsend.makeDecodeResult(4 * (2 * kMideaBits + 4));
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 true));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0xA18263FFFF6E, irsend.capture.value);
@@ -551,9 +570,10 @@ TEST(TestDecodeMidea, DecodeWithNonStrictSizes) {
   irsend.sendMidea(0x12, 8);  // Illegal value Midea 8-bit message.
   irsend.makeDecodeResult();
   // Should fail with strict on.
-  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                  true));
   // Should pass if strict off.
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, 8, false));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, 8, false));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(8, irsend.capture.bits);
   EXPECT_EQ(0x12, irsend.capture.value);
@@ -562,13 +582,14 @@ TEST(TestDecodeMidea, DecodeWithNonStrictSizes) {
   irsend.sendMidea(0x12345678, 32);  // Illegal value Midea 32-bit message.
   irsend.makeDecodeResult();
   // Shouldn't pass with strict when we ask for less bits than we got.
-  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kMideaBits, true));
+  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                  true));
 
   irsend.makeDecodeResult();
   // Should fail with strict when we ask for the wrong bit size.
-  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, 32, true));
+  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kStartOffset, 32, true));
   // Should pass if strict off.
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, 32, false));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, 32, false));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(32, irsend.capture.bits);
   EXPECT_EQ(0x12345678, irsend.capture.value);
@@ -577,7 +598,7 @@ TEST(TestDecodeMidea, DecodeWithNonStrictSizes) {
   irsend.reset();
   irsend.sendMidea(0x123456, kMideaBits, 2);
   irsend.makeDecodeResult();
-  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, 9, false));
+  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kStartOffset, 9, false));
 }
 
 // Decode (non-standard) 64-bit messages.
@@ -591,7 +612,7 @@ TEST(TestDecodeMidea, Decode64BitMessages) {
   irsend.sendMidea(0xFFFFFFFFFFFFFFFF, 64);
   irsend.makeDecodeResult();
   // Should work with a 'normal' match (not strict)
-  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, 64, false));
+  ASSERT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, 64, false));
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(64, irsend.capture.bits);
   EXPECT_EQ(0xFFFFFFFFFFFFFFFF, irsend.capture.value);
@@ -613,7 +634,8 @@ TEST(TestDecodeMidea, FailToDecodeNonMideaExample) {
   irsend.makeDecodeResult();
 
   ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture));
-  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kMideaBits, false));
+  ASSERT_FALSE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                  false));
 }
 
 // Decode against a real capture reported by a user. See issue #354
@@ -648,4 +670,304 @@ TEST(TestDecodeMidea, DecodeRealExample) {
   EXPECT_EQ(MIDEA, irsend.capture.decode_type);
   EXPECT_EQ(kMideaBits, irsend.capture.bits);
   EXPECT_EQ(0xA18263FFFF6E, irsend.capture.value);
+  EXPECT_EQ(
+      "Power: On, Mode: 2 (Auto), Celsius: Off, Temp: 18C/65F, Fan: 0 (Auto), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off",
+      IRAcUtils::resultAcToString(&irsend.capture));
+  stdAc::state_t r, p;
+  ASSERT_TRUE(IRAcUtils::decodeToState(&irsend.capture, &r, &p));
+}
+
+TEST(TestMideaACClass, toCommon) {
+  IRMideaAC ac(kGpioUnused);
+  ac.setPower(true);
+  ac.setMode(kMideaACCool);
+  ac.setUseCelsius(true);
+  ac.setTemp(20, true);
+  ac.setFan(kMideaACFanHigh);
+  // Now test it.
+  ASSERT_EQ(decode_type_t::MIDEA, ac.toCommon().protocol);
+  ASSERT_EQ(-1, ac.toCommon().model);
+  ASSERT_TRUE(ac.toCommon().power);
+  ASSERT_TRUE(ac.toCommon().celsius);
+  ASSERT_EQ(20, ac.toCommon().degrees);
+  ASSERT_EQ(stdAc::opmode_t::kCool, ac.toCommon().mode);
+  ASSERT_EQ(stdAc::fanspeed_t::kMax, ac.toCommon().fanspeed);
+  ASSERT_EQ(stdAc::swingv_t::kOff, ac.toCommon().swingv);
+  // Unsupported.
+  ASSERT_EQ(stdAc::swingh_t::kOff, ac.toCommon().swingh);
+  ASSERT_FALSE(ac.toCommon().turbo);
+  ASSERT_FALSE(ac.toCommon().clean);
+  ASSERT_FALSE(ac.toCommon().light);
+  ASSERT_FALSE(ac.toCommon().quiet);
+  ASSERT_FALSE(ac.toCommon().econo);
+  ASSERT_FALSE(ac.toCommon().filter);
+  ASSERT_FALSE(ac.toCommon().beep);
+  ASSERT_EQ(-1, ac.toCommon().sleep);
+  ASSERT_EQ(-1, ac.toCommon().clock);
+}
+
+// https://github.com/crankyoldgit/IRremoteESP8266/issues/819
+TEST(TestMideaACClass, CelsiusRemoteTemp) {
+  IRMideaAC ac(kGpioUnused);
+  uint64_t on_cool_low_17c = 0xA18840FFFF56;
+  uint64_t on_cool_low_30c = 0xA1884DFFFF5D;
+  ac.on();
+  ac.setMode(kMideaACCool);
+  ac.setFan(kMideaACFanLow);
+  ac.setTemp(17, true);
+  EXPECT_FALSE(ac.getUseCelsius());
+  ac.setUseCelsius(true);
+  EXPECT_TRUE(ac.getUseCelsius());
+  EXPECT_EQ(on_cool_low_17c, ac.getRaw());
+  EXPECT_EQ(
+      "Power: On, Mode: 0 (Cool), Celsius: On, Temp: 17C/62F, Fan: 1 (Low), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+  ac.setRaw(on_cool_low_17c);
+  EXPECT_EQ(17, ac.getTemp(true));
+  EXPECT_EQ(62, ac.getTemp(false));
+  EXPECT_EQ(
+      "Power: On, Mode: 0 (Cool), Celsius: On, Temp: 17C/62F, Fan: 1 (Low), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+  ac.setTemp(17, true);
+  EXPECT_EQ(17, ac.getTemp(true));
+  EXPECT_EQ(62, ac.getTemp(false));
+  EXPECT_EQ(on_cool_low_17c, ac.getRaw());
+
+  ac.setRaw(on_cool_low_30c);
+  EXPECT_EQ(
+      "Power: On, Mode: 0 (Cool), Celsius: On, Temp: 30C/86F, Fan: 1 (Low), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+}
+
+// https://github.com/crankyoldgit/IRremoteESP8266/issues/819
+TEST(TestMideaACClass, SwingV) {
+  IRMideaAC ac(kGpioUnused);
+  ac.setSwingVToggle(false);
+  ASSERT_FALSE(ac.getSwingVToggle());
+  ac.setSwingVToggle(true);
+  ASSERT_TRUE(ac.getSwingVToggle());
+  EXPECT_EQ(
+      "Power: On, Mode: 2 (Auto), Celsius: Off, Temp: 25C/77F, Fan: 0 (Auto), "
+      "Sleep: Off, Swing(V) Toggle: On, Econo Toggle: Off", ac.toString());
+  ac.setSwingVToggle(false);
+  ASSERT_FALSE(ac.getSwingVToggle());
+  EXPECT_EQ(
+      "Power: On, Mode: 2 (Auto), Celsius: Off, Temp: 25C/77F, Fan: 0 (Auto), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+  ac.setRaw(kMideaACToggleSwingV);
+  EXPECT_EQ("Swing(V) Toggle: On, Econo Toggle: Off", ac.toString());
+}
+
+// https://github.com/crankyoldgit/IRremoteESP8266/pull/1213
+TEST(TestMideaACClass, Econo) {
+  IRMideaAC ac(kGpioUnused);
+  ac.setEconoToggle(false);
+  ASSERT_FALSE(ac.getEconoToggle());
+  ac.setEconoToggle(true);
+  ASSERT_TRUE(ac.getEconoToggle());
+  EXPECT_EQ(
+      "Power: On, Mode: 2 (Auto), Celsius: Off, Temp: 25C/77F, Fan: 0 (Auto), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: On", ac.toString());
+  ac.setEconoToggle(false);
+  ASSERT_FALSE(ac.getEconoToggle());
+  EXPECT_EQ(
+      "Power: On, Mode: 2 (Auto), Celsius: Off, Temp: 25C/77F, Fan: 0 (Auto), "
+      "Sleep: Off, Swing(V) Toggle: Off, Econo Toggle: Off", ac.toString());
+  ac.setRaw(kMideaACToggleEcono);
+  EXPECT_EQ("Swing(V) Toggle: Off, Econo Toggle: On", ac.toString());
+}
+
+// Test abusing the protocol for sending 6 arbitary bytes.
+// See https://github.com/crankyoldgit/IRremoteESP8266/issues/887
+TEST(TestDecodeMidea, Issue887) {
+  IRsendTest irsend(0);
+  IRrecv irrecv(0);
+  irsend.begin();
+  irsend.reset();
+
+  uint64_t hwaddr = 0x1234567890AB;  // 48bits doen't conform to Midea checksum
+
+  irsend.sendMidea(hwaddr);
+  irsend.makeDecodeResult();
+
+  // Test normal operation, it shouldn't match.
+  EXPECT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_NE(MIDEA, irsend.capture.decode_type);
+  irsend.reset();
+  irsend.sendMidea(hwaddr);
+  irsend.makeDecodeResult();
+  EXPECT_FALSE(irrecv.decodeMidea(&irsend.capture));
+
+  // Now test it with Midea's strict processing turned off!
+  irsend.reset();
+  irsend.sendMidea(hwaddr);
+  irsend.makeDecodeResult();
+  EXPECT_TRUE(irrecv.decodeMidea(&irsend.capture, kStartOffset, kMideaBits,
+                                 false));
+  EXPECT_EQ(MIDEA, irsend.capture.decode_type);
+  EXPECT_EQ(kMideaBits, irsend.capture.bits);
+  EXPECT_EQ(hwaddr, irsend.capture.value);
+}
+
+// Ref: https://github.com/crankyoldgit/IRremoteESP8266/issues/1170
+TEST(TestDecodeMidea24, RealExample) {
+  IRsendTest irsend(kGpioUnused);
+  IRrecv irrecv(kGpioUnused);
+  irsend.begin();
+  irsend.reset();
+
+  const uint16_t rawData[103] = {
+      8928, 4412, 590, 1630, 588, 538, 538, 544, 610, 516, 592, 516, 590, 538,
+      568, 536, 538, 568, 592, 518, 588, 1630, 588, 1630, 560, 1680, 592, 1628,
+      594, 1628, 592, 1650, 568, 1630, 558, 1680, 594, 1652, 568, 514, 592, 536,
+      538, 568, 594, 516, 588, 538, 566, 518, 560, 566, 588, 514, 594, 1630,
+      588, 1630, 590, 1630, 560, 1680, 594, 1630, 588, 1652, 568, 1650, 540,
+      1680, 590, 512, 594, 518, 586, 538, 566, 538, 536, 568, 592, 540, 564,
+      540, 566, 540, 538, 1680, 590, 1626, 592, 1630, 588, 1628, 538, 1702, 590,
+      1630, 590, 13318, 8916, 2166, 638};  // UNKNOWN 774B249A
+
+  irsend.sendRaw(rawData, 103, 38);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_EQ(MIDEA24, irsend.capture.decode_type);
+  EXPECT_EQ(kMidea24Bits, irsend.capture.bits);
+  EXPECT_EQ(0x80C0C0, irsend.capture.value);
+  EXPECT_EQ(0, irsend.capture.address);
+  EXPECT_EQ(0, irsend.capture.command);
+}
+
+TEST(TestDecodeMidea24, SyntheticExample) {
+  IRsendTest irsend(kGpioUnused);
+  IRrecv irrecv(kGpioUnused);
+  irsend.begin();
+  irsend.reset();
+
+  irsend.sendMidea24(0x80C0C0);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_EQ(MIDEA24, irsend.capture.decode_type);
+  EXPECT_EQ(kMidea24Bits, irsend.capture.bits);
+  EXPECT_EQ(0x80C0C0, irsend.capture.value);
+  EXPECT_EQ(0, irsend.capture.address);
+  EXPECT_EQ(0, irsend.capture.command);
+  EXPECT_EQ(
+      "f38000d33"
+      "m8960s4480"
+      "m560s1680m560s560m560s560m560s560m560s560m560s560m560s560m560s560"
+      "m560s560m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680"
+      "m560s1680m560s1680m560s560m560s560m560s560m560s560m560s560m560s560"
+      "m560s560m560s560m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680"
+      "m560s1680m560s1680m560s560m560s560m560s560m560s560m560s560m560s560"
+      "m560s560m560s560m560s1680m560s1680m560s1680m560s1680m560s1680m560s1680"
+      "m560s22400"
+      "m8960s2240m560s96320",
+      irsend.outputStr());
+}
+
+TEST(TestUtils, Housekeeping) {
+  ASSERT_EQ("MIDEA", typeToString(decode_type_t::MIDEA));
+  ASSERT_EQ(decode_type_t::MIDEA, strToDecodeType("MIDEA"));
+  ASSERT_FALSE(hasACState(decode_type_t::MIDEA));
+  ASSERT_TRUE(IRac::isProtocolSupported(decode_type_t::MIDEA));
+  ASSERT_EQ(kNoRepeat, IRsend::minRepeats(decode_type_t::MIDEA));
+  ASSERT_EQ(kMideaBits, IRsend::defaultBits(decode_type_t::MIDEA));
+
+  ASSERT_EQ("MIDEA24", typeToString(decode_type_t::MIDEA24));
+  ASSERT_EQ(decode_type_t::MIDEA24, strToDecodeType("MIDEA24"));
+  ASSERT_FALSE(hasACState(decode_type_t::MIDEA24));
+  ASSERT_FALSE(IRac::isProtocolSupported(decode_type_t::MIDEA24));
+  ASSERT_EQ(kSingleRepeat, IRsend::minRepeats(decode_type_t::MIDEA24));
+  ASSERT_EQ(kMidea24Bits, IRsend::defaultBits(decode_type_t::MIDEA24));
+}
+
+TEST(TestDecodeMidea24, RealExample2) {
+  IRsendTest irsend(kGpioUnused);
+  IRrecv irrecv(kGpioUnused);
+  irsend.begin();
+  irsend.reset();
+
+  // https://github.com/crankyoldgit/IRremoteESP8266/issues/1170#issuecomment-639271003
+  const uint16_t rawData[103] = {
+      8926, 4412, 590, 1630, 536, 570, 608, 518, 594, 516, 588, 518, 588, 538,
+      538, 568, 592, 514, 590, 518, 588, 1630, 536, 1684, 610, 1628, 594, 1630,
+      588, 1630, 590, 1630, 560, 1680, 592, 1630, 588, 1650, 568, 538, 538, 568,
+      590, 514, 594, 538, 566, 518, 536, 594, 584, 516, 594, 518, 586, 1630,
+      588, 1650, 538, 1682, 592, 1630, 588, 1628, 588, 1630, 560, 1680, 590,
+      1626, 594, 538, 566, 538, 568, 536, 538, 570, 590, 538, 566, 538, 568,
+      538, 538, 568, 590, 1626, 594, 1650, 568, 1628, 558, 1662, 558, 1680, 592,
+      1650, 568, 13312, 8924, 2186, 588};  // UNKNOWN 774B249A
+
+  irsend.sendRaw(rawData, 103, 38);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_EQ(MIDEA24, irsend.capture.decode_type);
+  EXPECT_EQ(kMidea24Bits, irsend.capture.bits);
+  EXPECT_EQ(0x80C0C0, irsend.capture.value);
+  EXPECT_EQ(0, irsend.capture.address);
+  EXPECT_EQ(0, irsend.capture.command);
+
+  // ref: https://github.com/crankyoldgit/IRremoteESP8266/issues/1170#issuecomment-639349316
+  const uint16_t rawData639349316[105] = {
+      8924, 4410, 596, 1628, 590, 538, 538, 568, 588, 520, 592, 516, 588, 518,
+      588, 516, 558, 568, 594, 538, 566, 1652, 568, 1650, 540, 1680, 590, 1628,
+      592, 1628, 590, 1628, 590, 1650, 540, 1680, 592, 1630, 590, 518, 586, 538,
+      538, 568, 590, 514, 616, 494, 588, 516, 588, 516, 560, 566, 590, 1630,
+      586, 1634, 564, 1652, 538, 1704, 566, 948, 254, 450, 564, 1654, 566,
+      1652, 540, 1682, 610, 518, 588, 516, 590, 514, 590, 514, 582, 526, 614,
+      436, 670, 512, 592, 514, 538, 1578, 718, 1602, 614, 1542, 676, 1626, 538,
+      1678, 586, 1634, 616, 13308, 8920, 2158, 626};  // UNKNOWN CBEC0079
+  irsend.reset();
+  irsend.sendRaw(rawData639349316, 105, 38);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_NE(MIDEA24, irsend.capture.decode_type);
+
+  // Ref: https://github.com/crankyoldgit/IRremoteESP8266/issues/1170#issuecomment-639358566
+  const uint16_t rawData639358566[103] = {
+      8920, 4412, 620, 1606, 614, 512, 592, 512, 536, 568, 618, 512, 590, 492,
+      614, 514, 514, 590, 594, 510, 620, 1624, 592, 1604, 590, 1632, 608, 1626,
+      606, 1616, 618, 1602, 618, 1602, 560, 1682, 622, 1602, 618, 512, 592, 510,
+      538, 568, 590, 512, 622, 488, 616, 490, 614, 488, 560, 568, 620, 1624,
+      594, 1604, 616, 1602, 536, 1684, 640, 1600, 618, 1598, 618, 1602, 590,
+      1630, 612, 512, 622, 510, 594, 514, 592, 512, 534, 568, 620, 512, 594,
+      488, 616, 488, 536, 1702, 594, 1622, 622, 1604, 614, 1624, 594, 1602, 610,
+      1630, 620, 13294, 8914, 2184, 596};  // UNKNOWN 774B249A
+  irsend.reset();
+  irsend.sendRaw(rawData639358566, 103, 38);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_EQ(MIDEA24, irsend.capture.decode_type);
+  EXPECT_EQ(kMidea24Bits, irsend.capture.bits);
+  EXPECT_EQ(0x80C0C0, irsend.capture.value);
+  EXPECT_EQ(0, irsend.capture.address);
+  EXPECT_EQ(0, irsend.capture.command);
+}
+
+// See https://github.com/crankyoldgit/IRremoteESP8266/issues/1170#issuecomment-639468620
+// for why this test exists.
+TEST(TestDecodeMidea24, LargeTimeout) {
+  IRsendTest irsend(kGpioUnused);
+  IRrecv irrecv(kGpioUnused, 1000, 90);  // Test with a large timeout value
+  irsend.begin();
+  irsend.reset();
+  // Ref: https://github.com/crankyoldgit/IRremoteESP8266/issues/1170#issuecomment-639358566
+  const uint16_t rawData639358566[103] = {
+      8920, 4412, 620, 1606, 614, 512, 592, 512, 536, 568, 618, 512, 590, 492,
+      614, 514, 514, 590, 594, 510, 620, 1624, 592, 1604, 590, 1632, 608, 1626,
+      606, 1616, 618, 1602, 618, 1602, 560, 1682, 622, 1602, 618, 512, 592, 510,
+      538, 568, 590, 512, 622, 488, 616, 490, 614, 488, 560, 568, 620, 1624,
+      594, 1604, 616, 1602, 536, 1684, 640, 1600, 618, 1598, 618, 1602, 590,
+      1630, 612, 512, 622, 510, 594, 514, 592, 512, 534, 568, 620, 512, 594,
+      488, 616, 488, 536, 1702, 594, 1622, 622, 1604, 614, 1624, 594, 1602, 610,
+      1630, 620, 13294, 8914, 2184, 596};  // UNKNOWN 774B249A
+  irsend.reset();
+  irsend.sendRaw(rawData639358566, 103, 38);
+  irsend.makeDecodeResult();
+  ASSERT_TRUE(irrecv.decode(&irsend.capture));
+  EXPECT_EQ(MIDEA24, irsend.capture.decode_type);
+  EXPECT_EQ(kMidea24Bits, irsend.capture.bits);
+  EXPECT_EQ(0x80C0C0, irsend.capture.value);
+  EXPECT_EQ(0, irsend.capture.address);
+  EXPECT_EQ(0, irsend.capture.command);
 }

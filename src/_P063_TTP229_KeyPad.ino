@@ -1,3 +1,4 @@
+#include "_Plugin_Helper.h"
 #ifdef USES_P063
 //#######################################################################################################
 //#################################### Plugin 063: TTP229 KeyPad ########################################
@@ -28,7 +29,6 @@
 #define PLUGIN_NAME_063       "Keypad - TTP229 Touch"
 #define PLUGIN_VALUENAME1_063 "ScanCode"
 
-// #include <*.h>   no lib required
 
 
 uint16_t readTTP229(int16_t pinSCL, int16_t pinSDO)
@@ -70,7 +70,7 @@ boolean Plugin_063(byte function, struct EventStruct *event, String& string)
         Device[++deviceCount].Number = PLUGIN_ID_063;
         Device[deviceCount].Type = DEVICE_TYPE_DUAL;
         Device[deviceCount].Ports = 0;
-        Device[deviceCount].VType = SENSOR_TYPE_SWITCH;
+        Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_SWITCH;
         Device[deviceCount].PullUpOption = false;
         Device[deviceCount].InverseLogicOption = false;
         Device[deviceCount].FormulaOption = false;
@@ -187,7 +187,7 @@ boolean Plugin_063(byte function, struct EventStruct *event, String& string)
           {
             keyLast = key;
             UserVar[event->BaseVarIndex] = (float)key;
-            event->sensorType = SENSOR_TYPE_SWITCH;
+            event->sensorType = Sensor_VType::SENSOR_TYPE_SWITCH;
 
             String log = F("Tkey : ");
             if (PCONFIG(1))
