@@ -1,5 +1,6 @@
 
 #include <Arduino.h>
+#include <FastLED.h>
 
 #ifdef CONTINUOUS_INTEGRATION
 #pragma GCC diagnostic error "-Wall"
