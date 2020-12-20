@@ -175,7 +175,7 @@
 // #define USES_P002   // ADC
 // #define USES_P003   // Pulse
 // #define USES_P004   // Dallas
-#define USES_P005   // DHT
+// #define USES_P005   // DHT
 // #define USES_P006   // BMP085
 // #define USES_P007   // PCF8591
 // #define USES_P008   // RFID
@@ -282,10 +282,10 @@
 // #define USES_P102   // PZEM004Tv3
 // #define USES_P103   // Atlas_EZO_pH
 // #define USES_P104   // Atlas_EZO_EC
-// #define USES_P105   // Atlas_EZO_ORP
+#define USES_P105   // RGBW
 // #define USES_P106   // BME680
 // #define USES_P107   // Si1145
-
+#define USES_P123   // Lights
 
 // Special plugins needing IR library
 // #define USES_P016   // IR
